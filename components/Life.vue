@@ -25,7 +25,7 @@ export default {
       currentStatus: '',
       currentGeneration: [
         [0, 0, 0, 0, 0],
-        [0, 0, 1, 1, 0],
+        [0, 0, 0, 1, 0],
         [0, 1, 0, 1, 0],
         [0, 0, 1, 1, 0],
         [0, 0, 0, 0, 0]
@@ -49,8 +49,9 @@ export default {
       return !!counter;
     },
     cycleGeneration() {
+      this.currentStep++;
       this.currentStatus = `Шаг ${this.currentStep}`;
-      if(this.currentStep++ > 10 || !this.checkAll()) {
+      if(!this.checkAll()) {
         // eslint-disable-next-line no-console
         this.currentStatus = `Stopped on ${this.currentStep} step`;
         clearInterval(this.intervalId);
@@ -91,9 +92,10 @@ export default {
       const rowsToCount = this.itemsToCount(row);
       const colsToCount = this.itemsToCount(col);
       let counter = 0;
-      rowsToCount.forEach(row => {
-        colsToCount.forEach(col => {
-          counter += current[row][col];
+      rowsToCount.forEach(rowCount => {
+        colsToCount.forEach(colCount => {
+          if(!(rowCount === row && colCount === col))
+            counter += current[rowCount][colCount];
         })
       })
       return counter;
