@@ -3,12 +3,17 @@
     <div class="life-area">
       <template v-for="(row, rowIndex) in currentGeneration">
         <template v-for="(col, colIndex) in row">
-          <div :key="`${rowIndex}${colIndex}`" class="life-area__cell" :class="col ? 'alive': 'dead'"/>
+          <div
+               :key="`r${rowIndex}c${colIndex}`"
+               class="life-area__cell"
+               :class="col ? 'alive': 'dead'"
+               @click="changeCell(rowIndex, colIndex)"/>
         </template>
       </template>
     </div>
     <button class="life-button" @click="startCycle">Старт</button>
     <button class="life-button" @click="stopCycle">Стоп</button>
+    <button class="life-button" @click="putPlaner">Планер</button>
     <div class="life-text">{{ currentStatus }}</div>
   </div>
 </template>
@@ -23,26 +28,66 @@ export default {
       currentStep: 0,
       intervalId: null,
       currentStatus: '',
-      currentGeneration: [
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 1, 0],
-        [0, 1, 0, 1, 0],
-        [0, 0, 1, 1, 0],
-        [0, 0, 0, 0, 0]
-      ]
+      arrayDimension: 20,
+      currentGeneration: []
+        // [
+        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        // ]
+    }
+  },
+  created() {
+    for(let row = 0; row < this.arrayDimension; row ++) {
+      const rows = [];
+      for(let col = 0; col < this.arrayDimension; col ++) {
+        rows.push(0);
+      }
+      this.currentGeneration.push(rows);
     }
   },
   methods: {
+    putPlaner() {
+      this.currentGeneration[0][2] = 1;
+      this.currentGeneration[1][2] = 1;
+      this.currentGeneration[2][2] = 1;
+      this.currentGeneration[2][1] = 1;
+      this.currentGeneration[1][0] = 1;
+      this.currentGeneration = [...this.currentGeneration];
+    },
+    changeCell(row, col) {
+      // eslint-disable-next-line no-console
+      console.log(row,col);
+      this.currentGeneration[row][col] = this.currentGeneration[row][col] ? 0 : 1;
+      this.currentGeneration = [...this.currentGeneration];
+    },
     startCycle() {
-      this.intervalId = setInterval(this.cycleGeneration, 1000);
+      this.intervalId = setInterval(this.cycleGeneration, 250);
     },
     stopCycle() {
       clearInterval(this.intervalId);
     },
     checkAll() {
       let counter = 0;
-      for(let row = 0; row < 5; row++){
-        for(let col = 0; col < 5; col++) {
+      for(let row = 0; row < this.arrayDimension; row++){
+        for(let col = 0; col < this.arrayDimension; col++) {
           counter += this.currentGeneration[row][col];
         }
       }
@@ -52,32 +97,23 @@ export default {
       this.currentStep++;
       this.currentStatus = `Шаг ${this.currentStep}`;
       if(!this.checkAll()) {
-        // eslint-disable-next-line no-console
         this.currentStatus = `Stopped on ${this.currentStep} step`;
         clearInterval(this.intervalId);
       }
-      const nextGeneration = [
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0]
-      ];
-      for(let row = 0; row < 5; row++) {
-        // console.log(`row ${row}`);
-        for(let col = 0; col < 5; col++)
+      const nextGeneration = [];
+      for(let row = 0; row < this.arrayDimension; row++) {
+        const rows = [];
+        for(let col = 0; col < this.arrayDimension; col++)
         {
-          // console.log(`column ${col}`);
-          nextGeneration[row][col] = this.checkCell(this.currentGeneration, row, col);
+          rows.push(this.checkCell(row, col));
         }
+        nextGeneration.push(rows);
       }
-      this.currentGeneration = nextGeneration;
-      // console.log(nextGeneration);
-      // return nextGeneration;
+      this.currentGeneration = [...nextGeneration];
     },
-    checkCell(current, row, col) {
-      const neighbours = this.countNeighbours(current, row, col);
-      if(current[row][col])
+    checkCell(row, col) {
+      const neighbours = this.countNeighbours(row, col);
+      if(this.currentGeneration[row][col])
         if(neighbours < 4 && neighbours > 1)
           return 1;
         else
@@ -88,14 +124,14 @@ export default {
       else
         return 0;
     },
-    countNeighbours(current, row, col) {
+    countNeighbours(row, col) {
       const rowsToCount = this.itemsToCount(row);
       const colsToCount = this.itemsToCount(col);
       let counter = 0;
       rowsToCount.forEach(rowCount => {
         colsToCount.forEach(colCount => {
           if(!(rowCount === row && colCount === col))
-            counter += current[rowCount][colCount];
+            counter += this.currentGeneration[rowCount][colCount];
         })
       })
       return counter;
@@ -103,11 +139,11 @@ export default {
 
     itemsToCount(item) {
       let itemsToCount = [];
-      if(item > 0 && item < 4)
-        itemsToCount = [item - 1, item, item +1];
+      if(item > 0 && item < this.arrayDimension - 1)
+        itemsToCount = [item - 1, item, item + 1];
       if(item === 0)
-        itemsToCount = [4, item, item + 1];
-      if(item === 4)
+        itemsToCount = [this.arrayDimension - 1, item, item + 1];
+      if(item === this.arrayDimension - 1)
         itemsToCount = [item - 1, item, 0];
       return itemsToCount;
     }
