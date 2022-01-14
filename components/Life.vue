@@ -1,6 +1,6 @@
 <template>
   <div class="life">
-    <div class="life-area">
+    <div id="area" class="life-area">
       <template v-for="(row, rowIndex) in currentGeneration">
         <template v-for="(col, colIndex) in row">
           <div
@@ -11,9 +11,12 @@
         </template>
       </template>
     </div>
-    <button class="life-button" @click="startCycle">Старт</button>
-    <button class="life-button" @click="stopCycle">Стоп</button>
-    <button class="life-button" @click="putPlaner">Планер</button>
+    <div class="life-controls">
+      <button class="life-button" :disabled="intervalId" @click="startCycle">Старт</button>
+      <button class="life-button" :disabled="!intervalId" @click="stopCycle">Стоп</button>
+      <button class="life-button" @click="resetCurrentGeneration">Сбросить</button>
+      <button class="life-button" @click="putPlaner">Планер</button>
+    </div>
     <div class="life-text">{{ currentStatus }}</div>
   </div>
 </template>
@@ -28,42 +31,38 @@ export default {
       currentStep: 0,
       intervalId: null,
       currentStatus: '',
-      arrayDimension: 20,
+      arrayDimension: 50,
       currentGeneration: []
-        // [
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // ]
     }
   },
   created() {
-    for(let row = 0; row < this.arrayDimension; row ++) {
-      const rows = [];
-      for(let col = 0; col < this.arrayDimension; col ++) {
-        rows.push(0);
-      }
-      this.currentGeneration.push(rows);
-    }
+    this.resetCurrentGeneration();
+  },
+  mounted() {
+    const area = document.getElementById('area');
+    const dimension = 1000;
+    area.style.height = `${dimension}px`;
+    area.style.width = `${dimension}px`;
+    area.style.gridTemplateColumns = `repeat(${this.arrayDimension}, ${dimension/this.arrayDimension}px)`;
+    area.style.gridTemplateRows = `repeat(${this.arrayDimension}, ${dimension/this.arrayDimension}px)`;
   },
   methods: {
+    resetCurrentGeneration() {
+      if(this.intervalId) {
+        clearInterval(this.intervalId);
+        this.intervalId = null;
+      }
+      this.currentGeneration = [];
+      this.currentStatus = '';
+      this.currentStep = 0;
+      for(let row = 0; row < this.arrayDimension; row ++) {
+        const rows = [];
+        for(let col = 0; col < this.arrayDimension; col ++) {
+          rows.push(0);
+        }
+        this.currentGeneration.push(rows);
+      }
+    },
     putPlaner() {
       this.currentGeneration[0][2] = 1;
       this.currentGeneration[1][2] = 1;
@@ -73,16 +72,18 @@ export default {
       this.currentGeneration = [...this.currentGeneration];
     },
     changeCell(row, col) {
-      // eslint-disable-next-line no-console
-      console.log(row,col);
       this.currentGeneration[row][col] = this.currentGeneration[row][col] ? 0 : 1;
       this.currentGeneration = [...this.currentGeneration];
     },
     startCycle() {
-      this.intervalId = setInterval(this.cycleGeneration, 250);
+      if(!this.intervalId)
+        this.intervalId = setInterval(this.cycleGeneration, 250);
     },
     stopCycle() {
-      clearInterval(this.intervalId);
+      if(this.intervalId) {
+        clearInterval(this.intervalId);
+        this.intervalId = null;
+      }
     },
     checkAll() {
       let counter = 0;
@@ -99,6 +100,7 @@ export default {
       if(!this.checkAll()) {
         this.currentStatus = `Stopped on ${this.currentStep} step`;
         clearInterval(this.intervalId);
+        this.intervalId = null;
       }
       const nextGeneration = [];
       for(let row = 0; row < this.arrayDimension; row++) {
